@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug File Upload</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      padding: 12px 30px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #5568d3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+      margin-bottom: 20px;
+    }
+    pre {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .debug-info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      border-radius: 5px;
+    }
+    .debug-info h3 {
+      margin-top: 0;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 File Upload Debug Tool</h1>
+
+    <div class="info">
+      <strong>Purpose:</strong> This tool helps you debug the "Unexpected field in file upload" error by showing exactly what fields are being sent.
+    </div>
+
+    <form id="testForm">
+      <div class="form-group">
+        <label>Full Name:</label>
+        <input type="text" name="fullName" value="Test User" required>
+      </div>
+
+      <div class="form-group">
+        <label>Email:</label>
+        <input type="email" name="email" value="test@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Password:</label>
+        <input type="password" name="password" value="password123" required>
+      </div>
+
+      <div class="form-group">
+        <label>Confirm Password:</label>
+        <input type="password" name="confirmPassword" value="password123" required>
+      </div>
+
+      <div class="form-group">
+        <label>ID Card Front (image file):</label>
+        <input type="file" name="idCardFront" accept="image/*" required>
+      </div>
+
+      <div class="form-group">
+        <label>ID Card Back (image file):</label>
+        <input type="file" name="idCardBack" accept="image/*" required>
+      </div>
+
+      <div class="form-group">
+        <label>Occupation (optional):</label>
+        <input type="text" name="occupation" value="Plumber">
+      </div>
+
+      <button type="submit">Test Upload</button>
+    </form>
+
+    <div id="debugInfo" class="debug-info" style="display: none;">
+      <h3>📦 FormData Contents:</h3>
+      <pre id="formDataContents"></pre>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:5100/api';
+    const form = document.getElementById('testForm');
+    const result = document.getElementById('result');
+    const debugInfo = document.getElementById('debugInfo');
+    const formDataContents = document.getElementById('formDataContents');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      result.innerHTML = '';
+      debugInfo.style.display = 'block';
+
+      // Create FormData
+      const formData = new FormData(form);
+
+      // Debug: Show what's in the FormData
+      let debugText = 'Fields being sent:\n\n';
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          debugText += `${key}: [FILE] ${value.name} (${value.size} bytes, ${value.type})\n`;
+        } else {
+          debugText += `${key}: "${value}"\n`;
+        }
+      }
+      formDataContents.textContent = debugText;
+
+      try {
+        console.log('Sending request to:', `${API_URL}/providers/register`);
+
+        const response = await fetch(`${API_URL}/providers/register`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          result.className = 'result success';
+          result.innerHTML = `
+            <strong>✅ Success!</strong><br>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          result.className = 'result error';
+          result.innerHTML = `
+            <strong>❌ Error (${response.status})</strong><br>
+            <strong>Message:</strong> ${data.message}<br>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        result.className = 'result error';
+        result.innerHTML = `
+          <strong>❌ Network Error</strong><br>
+          ${error.message}<br><br>
+          <strong>Possible causes:</strong><br>
+          - Server is not running (run: npm run dev)<br>
+          - Wrong API URL (currently: ${API_URL})<br>
+          - CORS issue
+        `;
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Provider Login - Lavellh</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 450px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+    }
+
+    .remember-me input[type="checkbox"] {
+      width: auto;
+    }
+
+    .forgot-password {
+      color: #667eea;
+      text-decoration: none;
+    }
+
+    .forgot-password:hover {
+      text-decoration: underline;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-submit:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: #fee;
+      color: #c00;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #c00;
+      display: none;
+    }
+
+    .success-message {
+      background: #efe;
+      color: #060;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #060;
+      display: none;
+    }
+
+    .register-link {
+      text-align: center;
+      margin-top: 20px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .register-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+
+    .divider {
+      text-align: center;
+      margin: 30px 0;
+      color: #999;
+      font-size: 14px;
+      position: relative;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: #ddd;
+    }
+
+    .divider::before {
+      left: 0;
+    }
+
+    .divider::after {
+      right: 0;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .login-method-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: #f8f9fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.3s;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: #667eea;
+    }
+
+    .verification-status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .verification-status.pending {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
+
+    .verification-status.approved {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .verification-status.rejected {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Provider Login</h1>
+      <p>Welcome back! Please login to your account</p>
+    </div>
+
+    <div class="error-message" id="errorMessage"></div>
+    <div class="success-message" id="successMessage"></div>
+
+    <div class="login-method-tabs">
+      <button class="tab-btn active" id="emailTab" onclick="switchTab('email')">
+        Email
+      </button>
+      <button class="tab-btn" id="phoneTab" onclick="switchTab('phone')">
+        Phone
+      </button>
+    </div>
+
+    <form id="loginForm">
+      <div class="form-group" id="emailGroup">
+        <label for="email">Email Address</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="your.email@example.com"
+        >
+      </div>
+
+      <div class="form-group" id="phoneGroup" style="display: none;">
+        <label for="phoneNumber">Phone Number</label>
+        <input
+          type="tel"
+          name="phoneNumber"
+          id="phoneNumber"
+          placeholder="+1234567890"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Enter your password"
+          required
+        >
+      </div>
+
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe">
+          <span>Remember me</span>
+        </label>
+        <a href="#" class="forgot-password">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">
+        Login
+      </button>
+    </form>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Logging in...</p>
+    </div>
+
+    <div class="divider">OR</div>
+
+    <div class="register-link">
+      Don't have an account? <a href="provider-register.html">Register as Provider</a>
+    </div>
+  </div>
+
+  <script>
+    // API URL - update this to match your server
+    const API_URL = 'http://localhost:5100/api';
+
+    // Form elements
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loading = document.getElementById('loading');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const emailTab = document.getElementById('emailTab');
+    const phoneTab = document.getElementById('phoneTab');
+    const emailGroup = document.getElementById('emailGroup');
+    const phoneGroup = document.getElementById('phoneGroup');
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phoneNumber');
+
+    // Current login method
+    let loginMethod = 'email';
+
+    // Switch between email and phone login
+    window.switchTab = function(method) {
+      loginMethod = method;
+
+      if (method === 'email') {
+        emailTab.classList.add('active');
+        phoneTab.classList.remove('active');
+        emailGroup.style.display = 'block';
+        phoneGroup.style.display = 'none';
+        emailInput.required = true;
+        phoneInput.required = false;
+      } else {
+        phoneTab.classList.add('active');
+        emailTab.classList.remove('active');
+        phoneGroup.style.display = 'block';
+        emailGroup.style.display = 'none';
+        phoneInput.required = true;
+        emailInput.required = false;
+      }
+    };
+
+    // Form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Hide messages
+      errorMessage.style.display = 'none';
+      successMessage.style.display = 'none';
+
+      // Show loading
+      form.style.display = 'none';
+      loading.classList.add('show');
+      submitBtn.disabled = true;
+
+      // Prepare login data
+      const loginData = {
+        password: document.getElementById('password').value
+      };
+
+      if (loginMethod === 'email') {
+        loginData.email = emailInput.value;
+      } else {
+        loginData.phoneNumber = phoneInput.value;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/providers/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(loginData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Store token and user data
+          localStorage.setItem('token', data.data.token);
+          localStorage.setItem('user', JSON.stringify(data.data.user));
+          localStorage.setItem('provider', JSON.stringify(data.data.provider));
+
+          // Remember me functionality
+          if (document.getElementById('rememberMe').checked) {
+            localStorage.setItem('rememberMe', 'true');
+            if (loginMethod === 'email') {
+              localStorage.setItem('savedEmail', emailInput.value);
+            } else {
+              localStorage.setItem('savedPhone', phoneInput.value);
+            }
+          }
+
+          showSuccess(data.message + ' Redirecting...');
+
+          // Show verification status if needed
+          if (data.data.provider.verificationStatus === 'pending') {
+            showVerificationStatus('pending', 'Your account is pending verification by our team.');
+          } else if (data.data.provider.verificationStatus === 'approved') {
+            showVerificationStatus('approved', 'Your account is verified!');
+          }
+
+          // Redirect after 2 seconds
+          setTimeout(() => {
+            window.location.href = 'provider-dashboard.html';
+          }, 2000);
+        } else {
+          // Show error
+          showError(data.message || 'Login failed');
+          form.style.display = 'block';
+          loading.classList.remove('show');
+          submitBtn.disabled = false;
+        }
+      } catch (error) {
+        console.error('Login error:', error);
+        showError('Network error. Please check your connection and try again.');
+        form.style.display = 'block';
+        loading.classList.remove('show');
+        submitBtn.disabled = false;
+      }
+    });
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.style.display = 'block';
+      window.scrollTo(0, 0);
+    }
+
+    function showVerificationStatus(status, message) {
+      const statusDiv = document.createElement('div');
+      statusDiv.className = `verification-status ${status}`;
+      statusDiv.textContent = message;
+      document.querySelector('.container').appendChild(statusDiv);
+    }
+
+    // Load remembered credentials
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('rememberMe') === 'true') {
+        document.getElementById('rememberMe').checked = true;
+        const savedEmail = localStorage.getItem('savedEmail');
+        const savedPhone = localStorage.getItem('savedPhone');
+
+        if (savedEmail) {
+          emailInput.value = savedEmail;
+          switchTab('email');
+        } else if (savedPhone) {
+          phoneInput.value = savedPhone;
+          switchTab('phone');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

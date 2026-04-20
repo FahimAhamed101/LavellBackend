@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Employee - Lavellh</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 700px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .progress-bar::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #e0e0e0;
+      z-index: 0;
+    }
+
+    .progress-step {
+      flex: 1;
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+
+    .progress-step .circle {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      color: #999;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .progress-step.active .circle {
+      background: #667eea;
+      color: white;
+    }
+
+    .progress-step.completed .circle {
+      background: #4caf50;
+      color: white;
+    }
+
+    .progress-step .label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .step-content {
+      display: none;
+    }
+
+    .step-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-group label .required {
+      color: #e74c3c;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+
+    .form-group textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .char-count {
+      text-align: right;
+      font-size: 12px;
+      color: #999;
+      margin-top: 5px;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+
+    .file-input-wrapper label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      background: #f8f9fa;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .file-input-wrapper label:hover {
+      background: #e9ecef;
+      border-color: #667eea;
+    }
+
+    .file-input-wrapper label.has-file {
+      background: #e8f5e9;
+      border-color: #4caf50;
+    }
+
+    .preview-container {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .preview-container.show {
+      display: block;
+    }
+
+    .preview-image {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+    }
+
+    .category-checkboxes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .category-checkboxes label {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+
+    .category-checkboxes label:hover {
+      background: #f8f9fa;
+    }
+
+    .category-checkboxes input[type="checkbox"] {
+      margin-right: 8px;
+      width: auto;
+    }
+
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 26px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #667eea;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    .pricing-section {
+      display: none;
+    }
+
+    .pricing-section.active {
+      display: block;
+    }
+
+    .duration-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .duration-item {
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+    }
+
+    .duration-item h4 {
+      margin-bottom: 8px;
+      color: #667eea;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .error-message {
+      background: #fee;
+      color: #c00;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #c00;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4caf50;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Create Employee</h1>
+      <p>Add a new employee with their first service</p>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-step active" id="step1Indicator">
+        <div class="circle">1</div>
+        <div class="label">Employee Info</div>
+      </div>
+      <div class="progress-step" id="step2Indicator">
+        <div class="circle">2</div>
+        <div class="label">Service Details</div>
+      </div>
+      <div class="progress-step" id="step3Indicator">
+        <div class="circle">3</div>
+        <div class="label">Why Choose</div>
+      </div>
+      <div class="progress-step" id="step4Indicator">
+        <div class="circle">4</div>
+        <div class="label">Pricing</div>
+      </div>
+    </div>
+
+    <div id="errorMessage" class="error-message"></div>
+    <div id="successMessage" class="success-message"></div>
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Creating employee...</p>
+    </div>
+
+    <form id="employeeForm">
+      <!-- Step 1: Employee Info -->
+      <div class="step-content active" id="step1">
+        <h2 style="margin-bottom: 20px; color: #333;">Employee Information</h2>
+
+        <div class="form-group">
+          <label>Full Name <span class="required">*</span></label>
+          <input type="text" id="fullName" required>
+        </div>
+
+        <div class="form-group">
+          <label>Mobile Number <span class="required">*</span></label>
+          <input type="tel" id="mobileNumber" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email Address <span class="required">*</span></label>
+          <input type="email" id="email" required>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn btn-primary" onclick="goToStep(2)">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Service Details -->
+      <div class="step-content" id="step2">
+        <h2 style="margin-bottom: 20px; color: #333;">Service Details</h2>
+
+        <div class="form-group">
+          <label>Service Photo <span class="required">*</span></label>
+          <div class="file-input-wrapper">
+            <input type="file" id="servicePhoto" accept="image/*" required>
+            <label for="servicePhoto" id="servicePhotoLabel">
+              📷 Choose Photo
+            </label>
+          </div>
+          <div id="photoPreviewContainer" class="preview-container">
+            <img id="photoPreview" class="preview-image" alt="Preview">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Categories <span class="required">*</span></label>
+          <div id="categoryList" class="category-checkboxes">
+            <!-- Categories loaded dynamically -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Headline <span class="required">*</span> (Max 200 characters)</label>
+          <input type="text" id="headline" maxlength="200" required>
+          <div class="char-count"><span id="headlineCount">0</span>/200</div>
+        </div>
+
+        <div class="form-group">
+          <label>About This Service <span class="required">*</span> (Max 500 characters)</label>
+          <textarea id="description" maxlength="500" required></textarea>
+          <div class="char-count"><span id="descriptionCount">0</span>/500</div>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+          <button type="button" class="btn btn-primary" onclick="goToStep(3)">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Why Choose Service -->
+      <div class="step-content" id="step3">
+        <h2 style="margin-bottom: 20px; color: #333;">Why Choose This Service</h2>
+        <p style="margin-bottom: 20px; color: #666;">Provide up to 4 reasons (optional)</p>
+
+        <div class="form-group">
+          <label>Reason 1 (Max 200 characters)</label>
+          <input type="text" id="reason1" maxlength="200">
+          <div class="char-count"><span id="reason1Count">0</span>/200</div>
+        </div>
+
+        <div class="form-group">
+          <label>Reason 2 (Max 200 characters)</label>
+          <input type="text" id="reason2" maxlength="200">
+          <div class="char-count"><span id="reason2Count">0</span>/200</div>
+        </div>
+
+        <div class="form-group">
+          <label>Reason 3 (Max 200 characters)</label>
+          <input type="text" id="reason3" maxlength="200">
+          <div class="char-count"><span id="reason3Count">0</span>/200</div>
+        </div>
+
+        <div class="form-group">
+          <label>Reason 4 (Max 200 characters)</label>
+          <input type="text" id="reason4" maxlength="200">
+          <div class="char-count"><span id="reason4Count">0</span>/200</div>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+          <button type="button" class="btn btn-primary" onclick="goToStep(4)">Next</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Pricing -->
+      <div class="step-content" id="step4">
+        <h2 style="margin-bottom: 20px; color: #333;">Service Pricing</h2>
+
+        <div class="toggle-container">
+          <label class="toggle-switch">
+            <input type="checkbox" id="appointmentToggle">
+            <span class="slider"></span>
+          </label>
+          <div>
+            <strong>Make an Appointment</strong>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">Enable duration-based pricing</p>
+          </div>
+        </div>
+
+        <div id="basePriceSection" class="pricing-section active">
+          <div class="form-group">
+            <label>Base Service Price ($) <span class="required">*</span></label>
+            <input type="number" id="basePrice" min="0" step="0.01">
+          </div>
+        </div>
+
+        <div id="durationPricingSection" class="pricing-section">
+          <p style="margin-bottom: 15px; color: #666;">Set pricing for each duration</p>
+          <div class="duration-grid">
+            <div class="duration-item">
+              <h4>15 Minutes</h4>
+              <input type="number" id="price15" min="0" step="0.01" placeholder="Price ($)">
+            </div>
+            <div class="duration-item">
+              <h4>30 Minutes</h4>
+              <input type="number" id="price30" min="0" step="0.01" placeholder="Price ($)">
+            </div>
+            <div class="duration-item">
+              <h4>45 Minutes</h4>
+              <input type="number" id="price45" min="0" step="0.01" placeholder="Price ($)">
+            </div>
+            <div class="duration-item">
+              <h4>60 Minutes</h4>
+              <input type="number" id="price60" min="0" step="0.01" placeholder="Price ($)">
+            </div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn btn-secondary" onclick="goToStep(3)">Back</button>
+          <button type="submit" class="btn btn-primary">Create Employee</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:5100/api';
+    let currentStep = 1;
+    let categories = [];
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadCategories();
+      setupCharCounters();
+      setupFileUpload();
+      setupToggle();
+    });
+
+    // Load categories
+    async function loadCategories() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/categories`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          categories = data.data || [];
+          renderCategories();
+        }
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    }
+
+    // Render categories
+    function renderCategories() {
+      const container = document.getElementById('categoryList');
+      container.innerHTML = categories.map(cat => `
+        <label>
+          <input type="checkbox" name="categories" value="${cat._id}">
+          ${cat.name}
+        </label>
+      `).join('');
+    }
+
+    // Setup character counters
+    function setupCharCounters() {
+      const fields = [
+        { id: 'headline', countId: 'headlineCount' },
+        { id: 'description', countId: 'descriptionCount' },
+        { id: 'reason1', countId: 'reason1Count' },
+        { id: 'reason2', countId: 'reason2Count' },
+        { id: 'reason3', countId: 'reason3Count' },
+        { id: 'reason4', countId: 'reason4Count' }
+      ];
+
+      fields.forEach(field => {
+        const input = document.getElementById(field.id);
+        const counter = document.getElementById(field.countId);
+
+        input.addEventListener('input', () => {
+          counter.textContent = input.value.length;
+        });
+      });
+    }
+
+    // Setup file upload
+    function setupFileUpload() {
+      const input = document.getElementById('servicePhoto');
+      const label = document.getElementById('servicePhotoLabel');
+      const previewContainer = document.getElementById('photoPreviewContainer');
+      const preview = document.getElementById('photoPreview');
+
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          label.classList.add('has-file');
+          label.textContent = `✓ ${file.name}`;
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            preview.src = e.target.result;
+            previewContainer.classList.add('show');
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    // Setup toggle
+    function setupToggle() {
+      const toggle = document.getElementById('appointmentToggle');
+      const basePriceSection = document.getElementById('basePriceSection');
+      const durationSection = document.getElementById('durationPricingSection');
+
+      toggle.addEventListener('change', () => {
+        if (toggle.checked) {
+          basePriceSection.classList.remove('active');
+          durationSection.classList.add('active');
+        } else {
+          durationSection.classList.remove('active');
+          basePriceSection.classList.add('active');
+        }
+      });
+    }
+
+    // Navigate to step
+    function goToStep(step) {
+      // Validate current step before moving forward
+      if (step > currentStep && !validateStep(currentStep)) {
+        return;
+      }
+
+      // Hide all steps
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`step${i}`).classList.remove('active');
+        document.getElementById(`step${i}Indicator`).classList.remove('active');
+      }
+
+      // Mark completed steps
+      for (let i = 1; i < step; i++) {
+        document.getElementById(`step${i}Indicator`).classList.add('completed');
+      }
+
+      // Show target step
+      document.getElementById(`step${step}`).classList.add('active');
+      document.getElementById(`step${step}Indicator`).classList.add('active');
+
+      currentStep = step;
+      hideMessages();
+    }
+
+    // Validate step
+    function validateStep(step) {
+      hideMessages();
+
+      if (step === 1) {
+        const fullName = document.getElementById('fullName').value.trim();
+        const mobile = document.getElementById('mobileNumber').value.trim();
+        const email = document.getElementById('email').value.trim();
+
+        if (!fullName || !mobile || !email) {
+          showError('Please fill in all required fields');
+          return false;
+        }
+      } else if (step === 2) {
+        const photo = document.getElementById('servicePhoto').files[0];
+        const headline = document.getElementById('headline').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const selectedCategories = getSelectedCategories();
+
+        if (!photo) {
+          showError('Please upload a service photo');
+          return false;
+        }
+        if (selectedCategories.length === 0) {
+          showError('Please select at least one category');
+          return false;
+        }
+        if (!headline || !description) {
+          showError('Please fill in headline and description');
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    // Get selected categories
+    function getSelectedCategories() {
+      const checkboxes = document.querySelectorAll('input[name="categories"]:checked');
+      return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // Form submission
+    document.getElementById('employeeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Validate pricing
+      const appointmentEnabled = document.getElementById('appointmentToggle').checked;
+
+      if (appointmentEnabled) {
+        const slots = [
+          parseFloat(document.getElementById('price15').value) || 0,
+          parseFloat(document.getElementById('price30').value) || 0,
+          parseFloat(document.getElementById('price45').value) || 0,
+          parseFloat(document.getElementById('price60').value) || 0
+        ];
+
+        if (slots.every(price => price === 0)) {
+          showError('Please set at least one appointment duration price');
+          return;
+        }
+      } else {
+        const basePrice = parseFloat(document.getElementById('basePrice').value) || 0;
+        if (basePrice <= 0) {
+          showError('Please enter a valid base price');
+          return;
+        }
+      }
+
+      // Prepare form data
+      const formData = new FormData();
+
+      // Employee data
+      formData.append('fullName', document.getElementById('fullName').value);
+      formData.append('mobileNumber', document.getElementById('mobileNumber').value);
+      formData.append('email', document.getElementById('email').value);
+
+      // Service data
+      formData.append('servicePhoto', document.getElementById('servicePhoto').files[0]);
+      formData.append('headline', document.getElementById('headline').value);
+      formData.append('description', document.getElementById('description').value);
+
+      // Categories
+      const selectedCategories = getSelectedCategories();
+      formData.append('categories', JSON.stringify(selectedCategories));
+
+      // Why choose service
+      const whyChooseService = {
+        reason1: document.getElementById('reason1').value || '',
+        reason2: document.getElementById('reason2').value || '',
+        reason3: document.getElementById('reason3').value || '',
+        reason4: document.getElementById('reason4').value || ''
+      };
+      formData.append('whyChooseService', JSON.stringify(whyChooseService));
+
+      // Pricing
+      formData.append('appointmentEnabled', appointmentEnabled);
+
+      if (appointmentEnabled) {
+        const slots = [
+          { duration: 15, durationUnit: 'minutes', price: parseFloat(document.getElementById('price15').value) || 0 },
+          { duration: 30, durationUnit: 'minutes', price: parseFloat(document.getElementById('price30').value) || 0 },
+          { duration: 45, durationUnit: 'minutes', price: parseFloat(document.getElementById('price45').value) || 0 },
+          { duration: 60, durationUnit: 'minutes', price: parseFloat(document.getElementById('price60').value) || 0 }
+        ].filter(slot => slot.price > 0);
+
+        formData.append('appointmentSlots', JSON.stringify(slots));
+      } else {
+        formData.append('basePrice', document.getElementById('basePrice').value);
+      }
+
+      // Submit
+      try {
+        document.getElementById('loading').classList.add('show');
+        document.getElementById('employeeForm').style.display = 'none';
+
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/business-owners/employees`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        document.getElementById('loading').classList.remove('show');
+        document.getElementById('employeeForm').style.display = 'block';
+
+        if (response.ok) {
+          showSuccess(data.message);
+          setTimeout(() => {
+            window.location.href = 'business-owner-employee-list.html';
+          }, 2000);
+        } else {
+          showError(data.message || 'An error occurred');
+        }
+      } catch (error) {
+        document.getElementById('loading').classList.remove('show');
+        document.getElementById('employeeForm').style.display = 'block';
+        showError('Network error. Please try again.');
+        console.error('Error:', error);
+      }
+    });
+
+    // Show error
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      errorDiv.textContent = message;
+      errorDiv.classList.add('show');
+      window.scrollTo(0, 0);
+    }
+
+    // Show success
+    function showSuccess(message) {
+      const successDiv = document.getElementById('successMessage');
+      successDiv.textContent = message;
+      successDiv.classList.add('show');
+      window.scrollTo(0, 0);
+    }
+
+    // Hide messages
+    function hideMessages() {
+      document.getElementById('errorMessage').classList.remove('show');
+      document.getElementById('successMessage').classList.remove('show');
+    }
+  </script>
+</body>
+</html>
