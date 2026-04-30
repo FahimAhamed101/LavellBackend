@@ -3,6 +3,7 @@ const Service = require('../models/Service');
 const Review = require('../models/Review');
 const User = require('../models/User');
 const Event = require('../models/Event');
+const { buildImageUrl } = require('../utility/imageUrl');
 
 /**
  * Get featured providers for home page
@@ -129,7 +130,7 @@ exports.getFeaturedProviders = async (req, res) => {
         return {
           providerId: provider._id,
           name: providerUser.fullName,
-          profileImage: providerUser.profilePicture,
+          profileImage: buildImageUrl(req, providerUser.profilePicture),
           address: providerUser.location?.address || 'Address not available',
           distance: Math.round(distance), // Round to nearest meter
           distanceKm: (distance / 1000).toFixed(2), // Convert to km
@@ -143,7 +144,7 @@ exports.getFeaturedProviders = async (req, res) => {
             serviceId: service._id,
             serviceName: service.headline,
             serviceDetail: service.description,
-            servicePhoto: service.servicePhoto,
+            servicePhoto: buildImageUrl(req, service.servicePhoto),
             category: service.category,
             basePrice: service.basePrice,
             appointmentEnabled: service.appointmentEnabled,
@@ -158,7 +159,7 @@ exports.getFeaturedProviders = async (req, res) => {
             createdAt: review.createdAt,
             user: {
               name: review.userId?.fullName || 'Anonymous',
-              profilePicture: review.userId?.profilePicture
+              profilePicture: buildImageUrl(req, review.userId?.profilePicture)
             }
           }))
         };
@@ -436,7 +437,7 @@ exports.getProviderDetails = async (req, res) => {
           name: providerUser.fullName,
           email: providerUser.email,
           phoneNumber: providerUser.phoneNumber,
-          profileImage: providerUser.profilePicture,
+          profileImage: buildImageUrl(req, providerUser.profilePicture),
           address: providerUser.location?.address || 'Address not available',
           distance: distance,
           distanceKm: distanceKm,
@@ -452,7 +453,7 @@ exports.getProviderDetails = async (req, res) => {
           serviceId: service._id,
           serviceName: service.headline,
           serviceDetail: service.description,
-          servicePhoto: service.servicePhoto,
+          servicePhoto: buildImageUrl(req, service.servicePhoto),
           category: service.category,
           basePrice: service.basePrice,
           appointmentEnabled: service.appointmentEnabled,
@@ -470,14 +471,14 @@ exports.getProviderDetails = async (req, res) => {
           createdAt: review.createdAt,
           user: {
             name: review.userId?.fullName || 'Anonymous',
-            profilePicture: review.userId?.profilePicture
+            profilePicture: buildImageUrl(req, review.userId?.profilePicture)
           }
         })),
         portfolio: portfolio.map(item => ({
           portfolioId: item._id,
           title: item.title,
-          beforeImage: item.beforeImage,
-          afterImage: item.afterImage,
+          beforeImage: buildImageUrl(req, item.beforeImage),
+          afterImage: buildImageUrl(req, item.afterImage),
           about: item.about,
           serviceType: item.serviceType
         }))
@@ -566,7 +567,7 @@ exports.getNearbyProvidersByCategory = async (req, res) => {
         return {
           providerId: provider._id,
           name: providerUser.fullName,
-          profileImage: providerUser.profilePicture,
+          profileImage: buildImageUrl(req, providerUser.profilePicture),
           address: providerUser.location?.address || 'Address not available',
           distance: Math.round(distance), // Distance in meters
           distanceKm: (distance / 1000).toFixed(1), // Distance in km with 1 decimal
@@ -811,7 +812,7 @@ exports.getNearbyProvidersByCategoryId = async (req, res) => {
         return {
           providerId: provider._id,
           name: providerUser.fullName,
-          profileImage: providerUser.profilePicture,
+          profileImage: buildImageUrl(req, providerUser.profilePicture),
           address: providerUser.location?.address || 'Address not available',
           distance: Math.round(distance),
           distanceKm: (distance / 1000).toFixed(1),
@@ -822,7 +823,7 @@ exports.getNearbyProvidersByCategoryId = async (req, res) => {
             rating: service.rating,
             totalReviews: service.totalReviews,
             price: service.basePrice,
-            image: service.servicePhoto,
+            image: buildImageUrl(req, service.servicePhoto),
             appointmentEnabled: service.appointmentEnabled
           })),
           _pin: provider.discoveryPin || null
@@ -937,7 +938,7 @@ exports.getProvidersByCategoryId = async (req, res) => {
       return {
         providerId: provider._id,
         name: providerUser?.fullName,
-        profileImage: providerUser?.profilePicture,
+        profileImage: buildImageUrl(req, providerUser?.profilePicture),
         address: providerUser?.location?.address || 'Address not available',
         services: providerServices.map(service => ({
           serviceId: service._id,
@@ -946,7 +947,7 @@ exports.getProvidersByCategoryId = async (req, res) => {
           rating: service.rating,
           totalReviews: service.totalReviews,
           price: service.basePrice,
-          image: service.servicePhoto,
+          image: buildImageUrl(req, service.servicePhoto),
           appointmentEnabled: service.appointmentEnabled
         })),
         _pin: provider.discoveryPin || null

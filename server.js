@@ -6,6 +6,7 @@ require('./src/config/firebase');
 
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('./src/config/passport');
@@ -25,6 +26,7 @@ app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), handleSt
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Session middleware (required for Passport)
 app.use(session({

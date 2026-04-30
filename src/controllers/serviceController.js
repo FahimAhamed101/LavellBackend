@@ -4,6 +4,7 @@ const Review = require('../models/Review');
 const Category = require('../models/Category');
 const Portfolio = require('../models/Portfolio');
 const { uploadToCloudinary } = require('../utility/cloudinary');
+const { buildImageUrl } = require('../utility/imageUrl');
 
 /**
  * Create Service (Provider only)
@@ -734,14 +735,14 @@ exports.getServiceDetailForUser = async (req, res) => {
         provider: {
           id: service.providerId?._id,
           name: providerUser?.fullName,
-          image: providerUser?.profilePicture,
+          image: buildImageUrl(req, providerUser?.profilePicture),
           address: providerUser?.location?.address || 'Address not available',
           availableTime: service.providerId?.activityTime || ''
         },
         service: {
           serviceId: service._id,
           providerId: service.providerId?._id,
-          image: service.servicePhoto,
+          image: buildImageUrl(req, service.servicePhoto),
           title: service.headline,
           about: service.description,
           whyChooseUs: service.whyChooseUs,
@@ -755,7 +756,7 @@ exports.getServiceDetailForUser = async (req, res) => {
             createdAt: review.createdAt,
             user: {
               name: review.userId?.fullName || 'Anonymous',
-              image: review.userId?.profilePicture
+              image: buildImageUrl(req, review.userId?.profilePicture)
             }
           }))
         }
@@ -836,7 +837,7 @@ exports.getProviderProfileForUser = async (req, res) => {
 
       return {
         serviceId: service._id,
-        image: service.servicePhoto,
+        image: buildImageUrl(req, service.servicePhoto),
         title: service.headline,
         about: service.description,
         rating: service.rating,
@@ -854,7 +855,7 @@ exports.getProviderProfileForUser = async (req, res) => {
       data: {
         provider: {
           name: provider.userId?.fullName,
-          image: provider.userId?.profilePicture,
+          image: buildImageUrl(req, provider.userId?.profilePicture),
           address: provider.userId?.location?.address || 'Address not available',
           rating: provider.rating,
           totalReviews: provider.totalReviews
@@ -870,13 +871,13 @@ exports.getProviderProfileForUser = async (req, res) => {
           createdAt: review.createdAt,
           user: {
             name: review.userId?.fullName || 'Anonymous',
-            image: review.userId?.profilePicture
+            image: buildImageUrl(req, review.userId?.profilePicture)
           }
         })),
         portfolio: portfolioItems.map(item => ({
           portfolioId: item._id,
-          beforeImage: item.beforeImage,
-          afterImage: item.afterImage,
+          beforeImage: buildImageUrl(req, item.beforeImage),
+          afterImage: buildImageUrl(req, item.afterImage),
           about: item.about
         }))
       }

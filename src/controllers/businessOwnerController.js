@@ -16,6 +16,7 @@ const Settings = require('../models/Settings');
 const Notification = require('../models/Notification');
 const BusinessOwnerBooking = require('../models/BusinessOwnerBooking');
 const BusinessOwnerAppointment = require('../models/BusinessOwnerAppointment');
+const { buildImageUrl, buildImageUrls } = require('../utility/imageUrl');
 
 const OTP_EXPIRY_MS = 10 * 60 * 1000;
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -1382,8 +1383,8 @@ exports.getBusinessDetailsForUser = async (req, res) => {
     }
 
     const businessName = businessOwner.businessProfile?.name || businessOwner.businessName;
-    const businessCoverPhoto = businessOwner.businessProfile?.coverPhoto || null;
-    const businessPhoto = businessOwner.businessPhoto || null;
+    const businessCoverPhoto = buildImageUrl(req, businessOwner.businessProfile?.coverPhoto);
+    const businessPhoto = buildImageUrl(req, businessOwner.businessPhoto);
     const businessLocation =
       businessOwner.businessProfile?.location || businessOwner.businessAddress?.fullAddress || null;
     const about = businessOwner.businessProfile?.about || null;
@@ -1418,8 +1419,8 @@ exports.getBusinessDetailsForUser = async (req, res) => {
 
       return {
         employeeId: service.employeeId?._id,
-        employeeServicePhoto: service.servicePhoto,
-        employeeImage: service.employeeId?.profilePhoto || null,
+        employeeServicePhoto: buildImageUrl(req, service.servicePhoto),
+        employeeImage: buildImageUrl(req, service.employeeId?.profilePhoto),
         employeeName: service.employeeId?.fullName || null,
         employeeAddress: businessLocation,
         serviceHeadline: service.headline,
@@ -1474,7 +1475,7 @@ exports.getBusinessDetailsForUser = async (req, res) => {
         createdAt: review.reviewedAt || review.createdAt,
         user: {
           name: review.userId?.fullName || 'Anonymous',
-          image: review.userId?.profilePicture
+          image: buildImageUrl(req, review.userId?.profilePicture)
         }
       }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -1567,7 +1568,7 @@ exports.getEmployeeProfileForUser = async (req, res) => {
 
       return {
         serviceId: service._id,
-        image: service.servicePhoto,
+        image: buildImageUrl(req, service.servicePhoto),
         title: service.headline,
         about: service.description,
         rating: service.rating,
@@ -1615,7 +1616,7 @@ exports.getEmployeeProfileForUser = async (req, res) => {
         createdAt: review.reviewedAt || review.createdAt,
         user: {
           name: review.userId?.fullName || 'Anonymous',
-          image: review.userId?.profilePicture
+          image: buildImageUrl(req, review.userId?.profilePicture)
         }
       }))
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -1626,7 +1627,7 @@ exports.getEmployeeProfileForUser = async (req, res) => {
       data: {
         provider: {
           name: employee.fullName,
-          image: employee.profilePhoto,
+          image: buildImageUrl(req, employee.profilePhoto),
           address,
           rating: Math.round(weightedRating * 10) / 10,
           totalReviews
@@ -1707,13 +1708,16 @@ exports.getTopBusinesses = async (req, res) => {
     const topBusinesses = activeOwners.map(owner => {
       const stats = serviceMap.get(owner._id.toString());
       const businessName = owner.businessProfile?.name || owner.businessName;
-      const businessPhoto = owner.businessProfile?.coverPhoto || owner.businessPhoto || null;
+      const businessPhoto = buildImageUrl(
+        req,
+        owner.businessProfile?.coverPhoto || owner.businessPhoto || null
+      );
       const businessAddress = owner.businessProfile?.location || owner.businessAddress?.fullAddress || null;
 
       return {
         businessOwnerId: owner._id,
         businessOwnerName: owner.userId?.fullName || null,
-        businessOwnerPhoto: owner.userId?.profilePicture || null,
+        businessOwnerPhoto: buildImageUrl(req, owner.userId?.profilePicture),
         businessPhoto,
         businessName,
         businessRating: stats ? Math.round(stats.rating * 10) / 10 : 0,
@@ -1841,7 +1845,10 @@ exports.getAllBusinessOwnerProfiles = async (req, res) => {
           owner.businessAddress?.fullAddress ||
           owner.userId?.location?.address ||
           null;
-        const businessPhoto = owner.businessProfile?.coverPhoto || owner.businessPhoto || null;
+        const businessPhoto = buildImageUrl(
+          req,
+          owner.businessProfile?.coverPhoto || owner.businessPhoto || null
+        );
 
         return {
           _id: owner._id,
@@ -1850,7 +1857,7 @@ exports.getAllBusinessOwnerProfiles = async (req, res) => {
           businessOwnerName: owner.userId?.fullName || null,
           businessOwnerEmail: owner.userId?.email || null,
           businessOwnerPhoneNumber: owner.userId?.phoneNumber || null,
-          businessOwnerPhoto: owner.userId?.profilePicture || null,
+          businessOwnerPhoto: buildImageUrl(req, owner.userId?.profilePicture),
           occupation: owner.occupation || null,
           businessName,
           businessPhoto,
@@ -1865,11 +1872,11 @@ exports.getAllBusinessOwnerProfiles = async (req, res) => {
             : null,
           businessProfile: {
             name: owner.businessProfile?.name || null,
-            coverPhoto: owner.businessProfile?.coverPhoto || null,
+            coverPhoto: buildImageUrl(req, owner.businessProfile?.coverPhoto),
             location: owner.businessProfile?.location || null,
             about: owner.businessProfile?.about || null,
             categories: owner.businessProfile?.categories || [],
-            photos: owner.businessProfile?.photos || []
+            photos: buildImageUrls(req, owner.businessProfile?.photos || [])
           },
           businessRating: stats ? Math.round(stats.rating * 10) / 10 : 0,
           totalReviews: stats?.reviewCount || 0,
